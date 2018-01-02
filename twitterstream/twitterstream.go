@@ -19,17 +19,13 @@ func (t *TweetStreamer) FilterStream(params *twitter.StreamFilterParams) (*twitt
 	return t.Tc.Streams.Filter(params)
 }
 
-func NewOauthConfig(k keys.OauthKeys) (*oauth1.Config, *oauth1.Token) {
+func NewTweetStreamer(k keys.OauthKeys) TweetStreamer {
 	config := oauth1.NewConfig(k.ConsumerKey, k.ConsumerSecret)
 	token := oauth1.NewToken(k.AccessToken, k.AccessSecret)
+	httpClient := config.Client(oauth1.NoContext, token)
+	client := twitter.NewClient(httpClient)
 
-	return config, token
-}
-
-func NewTwitterClient(c *oauth1.Config, t *oauth1.Token) *twitter.Client {
-	httpClient := c.Client(oauth1.NoContext, t)
-
-	return twitter.NewClient(httpClient)
+	return TweetStreamer{client}
 }
 
 func FilterStream(ts tweetStreamer, filter []string) (*twitter.Stream, error)  {

@@ -18,6 +18,7 @@ func Load() []byte {
 	data, err := ioutil.ReadFile("./twitter_keys.json")
 
 	if err != nil {
+		fmt.Println("Error loading 'twitter_keys.json'")
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
@@ -27,7 +28,13 @@ func Load() []byte {
 
 func Parse(data []byte) OauthKeys {
 	keys := OauthKeys{}
-	json.Unmarshal(data, &keys)
+	err := json.Unmarshal(data, &keys)
+
+	if err != nil {
+		fmt.Println("Error parsing 'twitter_keys.json'")
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 
 	return keys
 }

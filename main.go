@@ -8,9 +8,7 @@ import (
 
 func main() {
 	twitterKeys := keys.Parse(keys.Load())
-	config, token := twitterstream.NewOauthConfig(twitterKeys)
-	twitterClient := twitterstream.NewTwitterClient(config, token)
-	streamer := twitterstream.TweetStreamer{twitterClient}
+	streamer := twitterstream.NewTweetStreamer(twitterKeys)
 	filter := []string{"happy"}
 	stream, _ := twitterstream.FilterStream(&streamer, filter)
 
