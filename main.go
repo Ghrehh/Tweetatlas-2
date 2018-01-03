@@ -3,52 +3,20 @@ package main
 import (
 	"net/http"
 	"os"
-	"log"
 	"strings"
 
 	"github.com/ghrehh/tweetatlas/twitterstream"
 	"github.com/ghrehh/tweetatlas/keys"
+	"github.com/ghrehh/tweetatlas/web"
 
 	"github.com/dghubble/go-twitter/twitter"
-	"github.com/gorilla/websocket"
 	"github.com/gorilla/handlers"
   "github.com/gorilla/mux"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-var RecentTweet *twitter.Tweet
-
-func tweets(w http.ResponseWriter, r *http.Request) {
-	var lastTweetId int64 = 0
-	c, err := upgrader.Upgrade(w, r, nil)
-
-	if err != nil {
-		log.Print("upgrade:", err)
-		return
-	}
-
-	for {
-		if lastTweetId != RecentTweet.ID {
-			lastTweetId = RecentTweet.ID
-
-			err = c.WriteJSON(RecentTweet)
-
-			if err != nil {
-				log.Print("write:", err)
-				break
-			}
-		}
-	}
-
-	defer c.Close()
-}
-
 func main() {
+	tweetStream := make(chan *twitter.Tweet)
+
 	twitterKeys := keys.Parse(keys.Load())
 	streamer := twitterstream.NewTweetStreamer(twitterKeys)
 	filter := []string{"happy"}
@@ -56,21 +24,26 @@ func main() {
 
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-		RecentTweet = tweet
+		tweetStream <- tweet
 	}
 
 	go demux.HandleChan(stream.Messages)
 
-	port := os.Getenv("PORT")
+	co := web.NewConnectionOrchestrator(tweetStream)
+	go co.Run()
+
 	r := mux.NewRouter()
 	r.Headers("Content-Type", "application/json")
-	r.HandleFunc("/tweets", tweets)
+	r.HandleFunc("/tweets", func(w http.ResponseWriter, r *http.Request) {
+		web.ServeWebsocket(co, w, r)
+	})
 
-	if port != "" {
-		portStrings := []string{":", port}
-		http.ListenAndServe(strings.Join(portStrings, ""), handlers.CORS()(r))
-	} else {
-		http.ListenAndServe(":5555", handlers.CORS()(r))
+	userSpecifiedPort := os.Getenv("PORT")
+	port := "5555"
+
+	if userSpecifiedPort != "" {
+		port = userSpecifiedPort
 	}
-	
+
+	http.ListenAndServe(strings.Join([]string{":", port}, ""), handlers.CORS()(r))
 }
