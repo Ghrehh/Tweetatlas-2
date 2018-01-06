@@ -1,3 +1,2 @@
-*.json
+config/twitter_keys.json
 tweetatlas
-test-results/

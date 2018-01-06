@@ -1,7 +1,7 @@
 package twitterstream
 
 import (
-	"github.com/ghrehh/tweetatlas/keys"
+	"github.com/ghrehh/tweetatlas/utils"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 )
@@ -19,7 +19,7 @@ func (t *TweetStream) FilterStream(params *twitter.StreamFilterParams) (*twitter
 	return t.Tc.Streams.Filter(params)
 }
 
-func NewTweetStream(k keys.OauthKeys) TweetStream {
+func NewTweetStream(k utils.OauthKeys) TweetStream {
 	config := oauth1.NewConfig(k.ConsumerKey, k.ConsumerSecret)
 	token := oauth1.NewToken(k.AccessToken, k.AccessSecret)
 	httpClient := config.Client(oauth1.NoContext, token)

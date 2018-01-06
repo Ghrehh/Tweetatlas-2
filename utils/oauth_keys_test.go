@@ -1,8 +1,8 @@
-package keys
+package utils
 
 import "testing"
 
-func TestParse(t *testing.T) {
+func TestOauthKeysParse(t *testing.T) {
 	keyData := `{
 			"consumer_key":"consumer key",
 			"consumer_secret":"consumer secret",
@@ -10,7 +10,7 @@ func TestParse(t *testing.T) {
 			"access_secret":"access secret"
 	}`
 
-	keys := Parse([]byte(keyData))
+	keys := parseOauthKeys([]byte(keyData))
 
 	if keys.ConsumerKey != "consumer key" {
 		t.Error("expected the correct value")

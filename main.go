@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/ghrehh/tweetatlas/twitterstream"
-	"github.com/ghrehh/tweetatlas/keys"
 	"github.com/ghrehh/tweetatlas/utils"
 	"github.com/ghrehh/tweetatlas/web"
 
@@ -17,7 +16,7 @@ import (
 )
 
 func main() {
-	log.Print("Tweetatlas Running")
+	log.Print("App Started")
 
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -29,9 +28,9 @@ func main() {
 	locationFinder := findlocation.NewLocationFinder()
 	co := web.NewConnectionOrchestrator()
 
-	twitterKeys := keys.GetOauthKeys()
+	twitterKeys := utils.GetOauthKeys()
 	streamer := twitterstream.NewTweetStream(twitterKeys)
-	filter := []string{"happy"}
+	filter := utils.GetStreamFilter()
 	stream, err := twitterstream.FilterStream(&streamer, filter)
 
 	if err != nil {

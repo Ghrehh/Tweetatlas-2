@@ -1,4 +1,4 @@
-package keys
+package utils
 
 import (
 	"fmt"
@@ -14,12 +14,12 @@ type OauthKeys struct {
 	AccessSecret string `json:"access_secret"`
 }
 
-func Parse(data []byte) OauthKeys {
+func parseOauthKeys(data []byte) OauthKeys {
 	keys := OauthKeys{}
 	err := json.Unmarshal(data, &keys)
 
 	if err != nil {
-		fmt.Println("Error parsing 'twitter_keys.json'")
+		fmt.Println("Error parsing 'config/twitter_keys.json'")
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
@@ -28,10 +28,10 @@ func Parse(data []byte) OauthKeys {
 }
 
 func GetOauthKeys() OauthKeys {
-	data, err := ioutil.ReadFile("./twitter_keys.json")
+	data, err := ioutil.ReadFile("config/twitter_keys.json")
 
 	if err == nil {
-		return Parse(data)
+		return parseOauthKeys(data)
 	}
 
 	consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
