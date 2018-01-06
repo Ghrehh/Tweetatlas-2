@@ -26,7 +26,7 @@ func main() {
 	locationFinder := findlocation.NewLocationFinder()
 	co := web.NewConnectionOrchestrator()
 
-	twitterKeys := keys.Parse(keys.Load())
+	twitterKeys := keys.GetOauthKeys()
 	streamer := twitterstream.NewTweetStream(twitterKeys)
 	filter := []string{"happy"}
 	stream, _ := twitterstream.FilterStream(&streamer, filter)
