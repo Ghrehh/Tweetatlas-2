@@ -22,10 +22,9 @@ func main() {
 		},
 	}
 
-	locationAggregateStream := make(chan web.LocationAggregater)
 	locationAggregate := web.NewLocationAggregate()
 	locationFinder := findlocation.NewLocationFinder()
-	co := web.NewConnectionOrchestrator(locationAggregateStream)
+	co := web.NewConnectionOrchestrator()
 
 	twitterKeys := keys.Parse(keys.Load())
 	streamer := twitterstream.NewTweetStream(twitterKeys)
@@ -36,7 +35,7 @@ func main() {
 	demux.Tweet = func(tweet *twitter.Tweet) {
 		location := locationFinder.FindLocation(tweet.User.Location)
 		locationAggregate.AddParsedLocation(location)
-		locationAggregateStream <- locationAggregate
+		co.LaStream <- locationAggregate
 	}
 
 	go demux.HandleChan(stream.Messages)

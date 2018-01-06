@@ -56,7 +56,10 @@ func ServeWebsocket(co *ConnectionOrchestrator, w http.ResponseWriter, r *http.R
 	}
 
 	connection := newConnection(co, conn)
-	co.add <- connection
+
+	go func() {
+		co.add <- connection
+	}()
 
 	go connection.writePump()
 

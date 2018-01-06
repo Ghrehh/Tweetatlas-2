@@ -26,27 +26,9 @@ func (f fakeLocationAggregate) ToJSON() []byte {
 	return []byte("foo")
 }
 
-func TestNewConnectionOrchestrator(t *testing.T) {
-	laToAddToChannel := NewLocationAggregate()
-	laChannel := make(chan LocationAggregater)
-
-	co := NewConnectionOrchestrator(laChannel)
-
-	go func() {
-		laChannel <- laToAddToChannel
-	}()
-
-	laToReceiveFromChannel := <- co.laStream
-
-	if laToAddToChannel != laToReceiveFromChannel {
-		t.Error("expected to receive the same pointer")
-	}
-}
-
 func TestConnectionOrchestratorRun(t *testing.T) {
 	la := fakeLocationAggregate{}
-	laChannel := make(chan LocationAggregater)
-	co := NewConnectionOrchestrator(laChannel)
+	co := NewConnectionOrchestrator()
 	c := newConnection(co, fakeWebsocketConnection{})
 
 	go co.Run()
@@ -57,7 +39,7 @@ func TestConnectionOrchestratorRun(t *testing.T) {
 		t.Error("expected connection to be added to connections map")
 	}
 
-	laChannel <- la
+	co.LaStream <- la
 	connectionData := <- c.dataStream
 
 	if string(*connectionData) != "foo" {

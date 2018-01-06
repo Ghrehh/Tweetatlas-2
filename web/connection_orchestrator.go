@@ -2,15 +2,15 @@ package web
 
 type ConnectionOrchestrator struct {
 	connections map[*Connection]bool
-	laStream chan LocationAggregater
+	LaStream chan LocationAggregater
 	add chan *Connection
 	remove chan *Connection
 }
 
-func NewConnectionOrchestrator(laStream chan LocationAggregater) *ConnectionOrchestrator {
+func NewConnectionOrchestrator() *ConnectionOrchestrator {
 	return &ConnectionOrchestrator{
 		connections: make(map[*Connection]bool),
-		laStream: laStream,
+		LaStream: make(chan LocationAggregater),
 		add: make(chan *Connection),
 		remove: make(chan *Connection),
 	}
@@ -26,7 +26,7 @@ func (co *ConnectionOrchestrator) Run() {
 				delete(co.connections, connection)
 				close(connection.dataStream)
 			}
-		case la := <-co.laStream:
+		case la := <- co.LaStream:
 			laJSON := la.ToJSON()
 
 			for connection := range co.connections {
