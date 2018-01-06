@@ -31,7 +31,7 @@ func (co *ConnectionOrchestrator) Run() {
 
 			for connection := range co.connections {
 				select {
-				case connection.dataStream <- &laJSON:
+				case connection.dataStream <- laJSON:
 				default:
 					close(connection.dataStream)
 					delete(co.connections, connection)

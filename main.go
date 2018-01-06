@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"fmt"
 
 	"github.com/ghrehh/tweetatlas/twitterstream"
 	"github.com/ghrehh/tweetatlas/keys"
@@ -16,6 +17,8 @@ import (
 )
 
 func main() {
+	fmt.Println("Tweetatlas Running")
+
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -29,13 +32,21 @@ func main() {
 	twitterKeys := keys.GetOauthKeys()
 	streamer := twitterstream.NewTweetStream(twitterKeys)
 	filter := []string{"happy"}
-	stream, _ := twitterstream.FilterStream(&streamer, filter)
+	stream, err := twitterstream.FilterStream(&streamer, filter)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
 		location := locationFinder.FindLocation(tweet.User.Location)
 		locationAggregate.AddParsedLocation(location)
 		co.LaStream <- locationAggregate
+	}
+
+	demux.Other = func(message interface{}) {
+		fmt.Println(message)
 	}
 
 	go demux.HandleChan(stream.Messages)

@@ -31,7 +31,6 @@ func NewTweetStream(k keys.OauthKeys) TweetStream {
 func FilterStream(ts tweetStreamer, filter []string) (*twitter.Stream, error)  {
 	params := &twitter.StreamFilterParams{
     Track: filter,
-    StallWarnings: twitter.Bool(true),
 	}
 
 	return ts.FilterStream(params)

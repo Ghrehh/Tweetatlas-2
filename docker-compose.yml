@@ -1,0 +1,19 @@
+version: '2'
+services:
+  service: &default
+    build: .
+    command: tweetatlas
+    environment:
+      - TWITTER_CONSUMER_KEY
+      - TWITTER_CONSUMER_SECRET
+      - TWITTER_ACCESS_TOKEN
+      - TWITTER_ACCESS_gECRET
+    ports:
+      - "0.0.0.0:5555:5555"
+
+  test:
+    build: .
+    command: go test -v ./...
+    volumes:
+      - "./test-results/:/usr/src/app/test-results"
+
