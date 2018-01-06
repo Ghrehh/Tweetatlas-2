@@ -33,3 +33,27 @@ Ensure you have [Docker](https://www.docker.com/) installed on your machine.
 To run the app `make run`
 
 To run the tests `make test`
+
+
+## What is outputted?
+
+Clients (like [Tweetatlas
+Client](https://github.com/Ghrehh/tweetatlas-client)) can connect to the server
+via a websocket connection. The server will then parse incoming tweets matching
+your provided filter parameters and attempt to figure out which country they
+originated from. This information is then fed to your client as a JSON object
+like the following:
+
+``` json
+{
+  "IE": 10,
+  "US": 100,
+  "unknown": 200,
+  etc...
+}
+```
+
+Where the key is the countries [ISO 3166
+Code](https://en.wikipedia.org/wiki/ISO_3166) and the value is the number of
+tweets associated with that country. Any tweet with a location that can not be
+parsed is assigned to the `unknown` key.
