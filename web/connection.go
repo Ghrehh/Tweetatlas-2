@@ -2,29 +2,33 @@ package web
 
 import (
 	"net/http"
+	"errors"
 	"log"
 
-	"github.com/dghubble/go-twitter/twitter"
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+
+type Upgrader interface {
+	Upgrade(http.ResponseWriter, *http.Request, http.Header) (*websocket.Conn, error)
+}
+
+type websocketConnection interface {
+	Close() error
+	WriteMessage(int, []byte) error
 }
 
 type Connection struct {
 	orchestrator *ConnectionOrchestrator
-	websocketConnection *websocket.Conn
-	tweetStream chan *twitter.Tweet
+	websocketConnection websocketConnection
+	dataStream chan *[]byte
 }
 
-func newConnection(co *ConnectionOrchestrator, conn *websocket.Conn) *Connection {
+func newConnection(co *ConnectionOrchestrator, conn websocketConnection) *Connection {
 	return &Connection{
 		orchestrator: co,
 		websocketConnection: conn,
-		tweetStream: make(chan *twitter.Tweet),
+		dataStream: make(chan *[]byte),
 	}
 }
 
@@ -32,8 +36,8 @@ func (c *Connection) writePump() {
 	defer c.websocketConnection.Close()
 
 	for {
-		tweet := <- c.tweetStream
-		err := c.websocketConnection.WriteJSON(tweet)
+		data := <- c.dataStream
+		err := c.websocketConnection.WriteMessage(1, *data)
 
 		if err != nil {
 			log.Print("Error sending message to client")
@@ -43,16 +47,18 @@ func (c *Connection) writePump() {
 	}
 }
 
-func ServeWebsocket(co *ConnectionOrchestrator, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+func ServeWebsocket(co *ConnectionOrchestrator, w http.ResponseWriter, r *http.Request, u Upgrader) (*Connection, error) {
+	conn, err := u.Upgrade(w, r, nil)
 
 	if err != nil {
 		log.Println(err)
-		return
+		return &Connection{}, errors.New("error opening websocket connection")
 	}
 
 	connection := newConnection(co, conn)
 	co.add <- connection
 
 	go connection.writePump()
+
+	return connection, nil
 }

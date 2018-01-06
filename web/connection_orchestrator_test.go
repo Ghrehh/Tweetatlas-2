@@ -1,0 +1,73 @@
+package web
+
+import (
+	"testing"
+	"time"
+)
+
+type fakeWebsocketConnection struct{
+}
+
+func (f fakeWebsocketConnection) Close() error {
+	return nil
+}
+
+func (f fakeWebsocketConnection) WriteMessage(int, []byte) error {
+	return nil
+}
+
+type fakeLocationAggregate struct{
+}
+
+func (f fakeLocationAggregate) AddParsedLocation(string) {
+}
+
+func (f fakeLocationAggregate) ToJSON() []byte {
+	return []byte("foo")
+}
+
+func TestNewConnectionOrchestrator(t *testing.T) {
+	laToAddToChannel := NewLocationAggregate()
+	laChannel := make(chan LocationAggregater)
+
+	co := NewConnectionOrchestrator(laChannel)
+
+	go func() {
+		laChannel <- laToAddToChannel
+	}()
+
+	laToReceiveFromChannel := <- co.laStream
+
+	if laToAddToChannel != laToReceiveFromChannel {
+		t.Error("expected to receive the same pointer")
+	}
+}
+
+func TestConnectionOrchestratorRun(t *testing.T) {
+	la := fakeLocationAggregate{}
+	laChannel := make(chan LocationAggregater)
+	co := NewConnectionOrchestrator(laChannel)
+	c := newConnection(co, fakeWebsocketConnection{})
+
+	go co.Run()
+
+	co.add <- c
+
+	if co.connections[c] != true {
+		t.Error("expected connection to be added to connections map")
+	}
+
+	laChannel <- la
+	connectionData := <- c.dataStream
+
+	if string(*connectionData) != "foo" {
+		t.Error("expected connection to receive correct byte array")
+	}
+
+	co.remove <- c
+	time.Sleep(time.Millisecond)
+
+	if co.connections[c] != false {
+		t.Error("expected connection to have been removed from the connections map")
+	}
+}

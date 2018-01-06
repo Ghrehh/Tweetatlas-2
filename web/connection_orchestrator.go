@@ -1,20 +1,16 @@
 package web
 
-import (
-	"github.com/dghubble/go-twitter/twitter"
-)
-
 type ConnectionOrchestrator struct {
 	connections map[*Connection]bool
-	tweetStream chan *twitter.Tweet
+	laStream chan LocationAggregater
 	add chan *Connection
 	remove chan *Connection
 }
 
-func NewConnectionOrchestrator(tweetStream chan *twitter.Tweet) *ConnectionOrchestrator {
+func NewConnectionOrchestrator(laStream chan LocationAggregater) *ConnectionOrchestrator {
 	return &ConnectionOrchestrator{
 		connections: make(map[*Connection]bool),
-		tweetStream: tweetStream,
+		laStream: laStream,
 		add: make(chan *Connection),
 		remove: make(chan *Connection),
 	}
@@ -28,14 +24,16 @@ func (co *ConnectionOrchestrator) Run() {
 		case connection := <- co.remove:
 			if _, ok := co.connections[connection]; ok {
 				delete(co.connections, connection)
-				close(connection.tweetStream)
+				close(connection.dataStream)
 			}
-		case tweet := <-co.tweetStream:
+		case la := <-co.laStream:
+			laJSON := la.ToJSON()
+
 			for connection := range co.connections {
 				select {
-				case connection.tweetStream <- tweet:
+				case connection.dataStream <- &laJSON:
 				default:
-					close(connection.tweetStream)
+					close(connection.dataStream)
 					delete(co.connections, connection)
 				}
 			}
