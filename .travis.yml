@@ -10,12 +10,8 @@ script:
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    echo "building";
     docker build -t tweetatlas .;
-    echo "logging in";
     docker login -u "$HEROKU_USERNAME" -p "$HEROKU_PASSWORD" registry.heroku.com;
-    echo "tagging";
     docker tag tweetatlas registry.heroku.com/tweetatlas/web;
-    echo "pushing";
     docker push registry.heroku.com/tweetatlas/web;
     fi
