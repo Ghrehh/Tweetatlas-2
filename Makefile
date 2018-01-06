@@ -5,6 +5,5 @@ run:
 	@docker-compose run --service-ports --name tweetatlas --rm service
 
 test:
-	@docker-compose build test
-	@docker-compose run --rm test
-	@docker-compose down
+	@docker-compose up --exit-code-from test --force-recreate --build test
+	@docker-compose rm -f test
