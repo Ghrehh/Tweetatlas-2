@@ -42,7 +42,7 @@ func TestConnectionOrchestratorRun(t *testing.T) {
 	co.LaStream <- la
 	connectionData := <- c.dataStream
 
-	if string(connectionData) != "foo" {
+	if string(*connectionData) != "foo" {
 		t.Error("expected connection to receive correct byte array")
 	}
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"net/http"
-	"fmt"
+	"log"
 
 	"github.com/ghrehh/tweetatlas/twitterstream"
 	"github.com/ghrehh/tweetatlas/keys"
@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Tweetatlas Running")
+	log.Print("Tweetatlas Running")
 
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -35,7 +35,7 @@ func main() {
 	stream, err := twitterstream.FilterStream(&streamer, filter)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Print(err)
 	}
 
 	demux := twitter.NewSwitchDemux()
@@ -46,7 +46,7 @@ func main() {
 	}
 
 	demux.Other = func(message interface{}) {
-		fmt.Println(message)
+		log.Print(message)
 	}
 
 	go demux.HandleChan(stream.Messages)

@@ -21,29 +21,26 @@ type websocketConnection interface {
 type Connection struct {
 	orchestrator *ConnectionOrchestrator
 	websocketConnection websocketConnection
-	dataStream chan []byte
+	dataStream chan *[]byte
 }
 
 func newConnection(co *ConnectionOrchestrator, conn websocketConnection) *Connection {
 	return &Connection{
 		orchestrator: co,
 		websocketConnection: conn,
-		dataStream: make(chan []byte, 1),
+		dataStream: make(chan *[]byte),
 	}
 }
 
 func (c *Connection) writePump() {
-	defer c.websocketConnection.Close()
+	defer func() {
+		c.websocketConnection.Close()
+		c.orchestrator.remove <- c
+	}()
 
 	for {
 		data := <- c.dataStream
-
-		if string(data) == "" {
-			log.Print("shit broke")
-			break
-		}
-
-		err := c.websocketConnection.WriteMessage(1, data)
+		err := c.websocketConnection.WriteMessage(1, *data)
 
 		if err != nil {
 			log.Print("Error sending message to client")

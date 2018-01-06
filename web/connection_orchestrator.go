@@ -1,5 +1,9 @@
 package web
 
+import (
+	"log"
+)
+
 type ConnectionOrchestrator struct {
 	connections map[*Connection]bool
 	LaStream chan LocationAggregater
@@ -25,16 +29,15 @@ func (co *ConnectionOrchestrator) Run() {
 			if _, ok := co.connections[connection]; ok {
 				delete(co.connections, connection)
 				close(connection.dataStream)
+				log.Print("closed connection")
 			}
 		case la := <- co.LaStream:
 			laJSON := la.ToJSON()
 
 			for connection := range co.connections {
 				select {
-				case connection.dataStream <- laJSON:
+				case connection.dataStream <- &laJSON:
 				default:
-					close(connection.dataStream)
-					delete(co.connections, connection)
 				}
 			}
 		}
