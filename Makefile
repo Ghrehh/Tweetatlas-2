@@ -1,9 +1,9 @@
 .PHONY: run test
 
 run:
-	@docker-compose build
-	@docker-compose run --service-ports --name tweetatlas --rm service
+	@docker-compose build service
+	@docker-compose up service
 
 test:
-	@docker-compose up --exit-code-from test --force-recreate --build test
-	@docker-compose rm -f test
+	@docker-compose build test
+	@docker-compose run --rm test
