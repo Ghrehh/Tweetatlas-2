@@ -24,13 +24,14 @@ func main() {
 		},
 	}
 
-	locationAggregate := web.NewLocationAggregate()
+	filter := utils.GetStreamFilter()
+
+	locationAggregate := web.NewLocationAggregate(filter)
 	locationFinder := findlocation.NewLocationFinder()
 	co := web.NewConnectionOrchestrator()
 
 	twitterKeys := utils.GetOauthKeys()
 	streamer := twitterstream.NewTweetStream(twitterKeys)
-	filter := utils.GetStreamFilter()
 	stream, err := twitterstream.FilterStream(&streamer, filter)
 
 	if err != nil {
