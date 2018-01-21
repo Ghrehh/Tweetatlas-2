@@ -38,6 +38,7 @@ func main() {
 		log.Print(err)
 	}
 
+	// Handle different types returned by the stream
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
 		location := locationFinder.FindLocation(tweet.User.Location)
@@ -50,8 +51,11 @@ func main() {
 	}
 
 	go demux.HandleChan(stream.Messages)
+
+	// Start the connection orchestrator
 	go co.Run()
 
+	// Routing
 	r := mux.NewRouter()
 	r.Headers("Content-Type", "application/json")
 	r.HandleFunc("/tweets", func(w http.ResponseWriter, r *http.Request) {
