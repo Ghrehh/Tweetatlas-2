@@ -3,13 +3,13 @@
 ## Twitter Keys
 
 To run this app, you must have a set of Twitter API keys. Please refer to the
-[Twitter docs](https://developer.twitter.com/en/docs) for information on how to
+[Twitter docs](https://developer.twitter. com/en/docs) for information on how to
 acquire those.
 
 To make running the app locally easier, you can copy the
 `config/twitter_keys.json.example` into a new file called
 `config/twitter_keys.json` and set your keys there.
-
+ 
 Otherwise you can export the keys as environment variables:
 - `TWITTER_CONSUMER_KEY`
 - `TWITTER_CONSUMER_SECRET`
