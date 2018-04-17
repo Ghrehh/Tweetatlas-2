@@ -10,20 +10,12 @@ import (
 
 	"github.com/ghrehh/findlocation"
 	"github.com/dghubble/go-twitter/twitter"
-	"github.com/gorilla/handlers"
   "github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
 func main() {
 	log.Print("App Started")
-
-	// Upgrade to a websocket connection
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
 
 	// Get the search phrase(s)
 	filter := utils.GetStreamFilter()
@@ -61,10 +53,12 @@ func main() {
 		log.Print(message)
 	}
 
-	go demux.HandleChan(stream.Messages)
-
-	// Start the connection orchestrator
-	go co.Run()
+	// Upgrade to a websocket connection, allow all origins
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
 
 	// Routing
 	r := mux.NewRouter()
@@ -73,6 +67,12 @@ func main() {
 		web.ServeWebsocket(co, w, r, &upgrader)
 	})
 
+	// Start the stream with the demux
+	go demux.HandleChan(stream.Messages)
+
+	// Start the connection orchestrator
+	go co.Run()
+
 	// Serve routes with CORs handler
-	http.ListenAndServe(utils.GetPort(), handlers.CORS()(r))
+	http.ListenAndServe(utils.GetPort(), r)
 }
