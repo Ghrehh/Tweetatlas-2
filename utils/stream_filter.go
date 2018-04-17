@@ -17,8 +17,7 @@ func parseStreamParams(data []byte) StreamParams {
 
 	if err != nil {
 		log.Print("Error parsing 'config/stream_params.json'")
-		log.Print(err.Error())
-		os.Exit(1)
+		log.Fatal(err.Error())
 	}
 
 	return params
@@ -40,8 +39,7 @@ func GetStreamFilter() []string {
 
 	if err != nil {
 		log.Print("Error opening 'config/stream_params.json'")
-		log.Print(err.Error())
-		os.Exit(1)
+		log.Fatal(err.Error())
 	}
 
 	params := parseStreamParams(data)
