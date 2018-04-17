@@ -2,11 +2,13 @@ package web
 
 import (
 	"log"
+
+	"github.com/ghrehh/tweetatlas/twitterstream"
 )
 
 type ConnectionOrchestrator struct {
 	connections map[*Connection]bool
-	LaStream chan LocationAggregater
+	LaStream chan twitterstream.LocationAggregater
 	add chan *Connection
 	remove chan *Connection
 }
@@ -14,7 +16,7 @@ type ConnectionOrchestrator struct {
 func NewConnectionOrchestrator() *ConnectionOrchestrator {
 	return &ConnectionOrchestrator{
 		connections: make(map[*Connection]bool),
-		LaStream: make(chan LocationAggregater),
+		LaStream: make(chan twitterstream.LocationAggregater),
 		add: make(chan *Connection),
 		remove: make(chan *Connection),
 	}

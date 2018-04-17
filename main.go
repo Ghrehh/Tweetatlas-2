@@ -21,7 +21,7 @@ func main() {
 	filter := utils.GetStreamFilter()
 
 	// Location aggregate stores our location results
-	locationAggregate := web.NewLocationAggregate(filter)
+	locationAggregate := twitterstream.NewLocationAggregate(filter)
 
 	// Location finder is a package that attempts to find a Twitter user's location.
 	locationFinder := findlocation.NewLocationFinder()
