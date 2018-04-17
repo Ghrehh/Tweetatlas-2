@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"io/ioutil"
 	"encoding/json"
@@ -19,9 +19,8 @@ func parseOauthKeys(data []byte) OauthKeys {
 	err := json.Unmarshal(data, &keys)
 
 	if err != nil {
-		fmt.Println("Error parsing 'config/twitter_keys.json'")
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Print("Error parsing 'config/twitter_keys.json'")
+		log.Fatal(err.Error())
 	}
 
 	return keys
@@ -37,29 +36,25 @@ func GetOauthKeys() OauthKeys {
 	consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
 
 	if consumerKey == "" {
-		fmt.Println("TWITTER_CONSUMER_KEY env variable not set")
-		os.Exit(1)
+		log.Fatal("TWITTER_CONSUMER_KEY env variable not set")
 	}
 
 	consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
 
 	if consumerSecret == "" {
-		fmt.Println("TWITTER_CONSUMER_SECRET env variable not set")
-		os.Exit(1)
+		log.Fatal("TWITTER_CONSUMER_SECRET env variable not set")
 	}
 
 	accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
 
 	if accessToken == "" {
-		fmt.Println("TWITTER_ACCESS_TOKEN env variable not set")
-		os.Exit(1)
+		log.Fatal("TWITTER_ACCESS_TOKEN env variable not set")
 	}
 
 	accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
 
 	if accessSecret == "" {
-		fmt.Println("TWITTER_ACCESS_SECRET env variable not set")
-		os.Exit(1)
+		log.Fatal("TWITTER_ACCESS_SECRET env variable not set")
 	}
 
 	return OauthKeys{

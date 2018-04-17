@@ -25,7 +25,6 @@ func parseStreamParams(data []byte) StreamParams {
 }
 
 func GetStreamFilter() []string {
-
 	// Attempt to get a search phrase from an environment variable
 	// Env var is passed as a JSON string
 	var search_phrases []string
