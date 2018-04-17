@@ -18,25 +18,29 @@ import (
 func main() {
 	log.Print("App Started")
 
+	// Upgrade to a websocket connection
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
 	}
 
-	// get the search phrase(s)
+	// Get the search phrase(s)
 	filter := utils.GetStreamFilter()
 
-	// location aggregate stores our location results
+	// Location aggregate stores our location results
 	locationAggregate := web.NewLocationAggregate(filter)
 
-	// location finder is a package that attempts to find a Twitter user's location.
+	// Location finder is a package that attempts to find a Twitter user's location.
 	locationFinder := findlocation.NewLocationFinder()
 
-	// connection orchestartor manages the websocket connections
+	// Connection orchestartor manages the websocket connections
 	co := web.NewConnectionOrchestrator()
 
+	// Get twitter keys
 	twitterKeys := utils.GetOauthKeys()
+
+	// Create tweet stream
 	streamer := twitterstream.NewTweetStream(twitterKeys)
 	stream, err := twitterstream.FilterStream(&streamer, filter)
 
@@ -52,6 +56,7 @@ func main() {
 		co.LaStream <- locationAggregate
 	}
 
+	// Log any message in the stream other than a tweet
 	demux.Other = func(message interface{}) {
 		log.Print(message)
 	}
@@ -68,5 +73,6 @@ func main() {
 		web.ServeWebsocket(co, w, r, &upgrader)
 	})
 
+	// Serve routes with CORs handler
 	http.ListenAndServe(utils.GetPort(), handlers.CORS()(r))
 }
