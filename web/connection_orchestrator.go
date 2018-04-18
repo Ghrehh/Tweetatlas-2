@@ -37,10 +37,7 @@ func (co *ConnectionOrchestrator) Run() {
 			laJSON := la.ToJSON()
 
 			for connection := range co.connections {
-				select {
-				case connection.dataStream <- &laJSON:
-				default:
-				}
+				connection.dataStream <- &laJSON
 			}
 		}
 	}
