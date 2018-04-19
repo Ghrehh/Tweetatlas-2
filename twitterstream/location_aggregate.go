@@ -2,18 +2,21 @@ package twitterstream
 
 import (
 	"encoding/json"
-	"fmt"
-	"os"
 	"sync"
+	"log"
+
+	"github.com/dghubble/go-twitter/twitter"
 )
 
 type LocationAggregater interface {
 	AddParsedLocation(string)
 	ToJSON() []byte
+	AddSampleTweet(*twitter.Tweet)
 }
 
 type LocationAggregate struct {
 	Data map[string]int `json:"location_data"`
+	SampleTweet *twitter.Tweet `json:"sample_tweet"`
 	SearchPhrases []string `json:"search_phrases"`
 	mutex *sync.Mutex
 }
@@ -36,16 +39,21 @@ func (la *LocationAggregate) AddParsedLocation(location string) {
 	la.mutex.Unlock()
 }
 
+func (la *LocationAggregate) AddSampleTweet(tweet *twitter.Tweet) {
+	la.mutex.Lock()
+	la.SampleTweet = tweet
+	la.mutex.Unlock()
+}
+
 func (la *LocationAggregate) ToJSON() []byte {
 	la.mutex.Lock()
-	jsonString, err := json.Marshal(la)
+	json, err := json.Marshal(la)
 	la.mutex.Unlock()
 
 	if err != nil {
-		fmt.Println("Error JSONifying the LocationAggregate")
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Print("Error JSONifying the LocationAggregate")
+		log.Fatal(err.Error())
 	}
 
-	return jsonString
+	return json
 }

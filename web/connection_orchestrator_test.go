@@ -3,6 +3,8 @@ package web
 import (
 	"testing"
 	"time"
+
+	"github.com/dghubble/go-twitter/twitter"
 )
 
 type fakeWebsocketConnection struct{
@@ -20,6 +22,9 @@ type fakeLocationAggregate struct{
 }
 
 func (f fakeLocationAggregate) AddParsedLocation(string) {
+}
+
+func (f fakeLocationAggregate) AddSampleTweet(*twitter.Tweet) {
 }
 
 func (f fakeLocationAggregate) ToJSON() []byte {

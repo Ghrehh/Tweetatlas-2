@@ -45,6 +45,7 @@ func main() {
 	demux.Tweet = func(tweet *twitter.Tweet) {
 		location := locationFinder.FindLocation(tweet.User.Location)
 		locationAggregate.AddParsedLocation(location)
+		locationAggregate.AddSampleTweet(tweet)
 		co.LaStream <- locationAggregate
 	}
 
