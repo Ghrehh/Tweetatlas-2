@@ -29,17 +29,6 @@ func main() {
 	// Connection orchestartor manages the websocket connections
 	co := web.NewConnectionOrchestrator()
 
-	// Get twitter keys
-	twitterKeys := utils.GetOauthKeys()
-
-	// Create tweet stream
-	streamer := twitterstream.NewTweetStream(twitterKeys)
-	stream, err := twitterstream.FilterStream(&streamer, filter)
-
-	if err != nil {
-		log.Print(err)
-	}
-
 	// Handle different types returned by the stream
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
@@ -47,11 +36,6 @@ func main() {
 		locationAggregate.AddParsedLocation(location)
 		locationAggregate.AddSampleTweet(tweet)
 		co.LaStream <- locationAggregate
-	}
-
-	// Log any message in the stream other than a tweet
-	demux.Other = func(message interface{}) {
-		log.Print(message)
 	}
 
 	// Upgrade to a websocket connection, allow all origins
@@ -68,11 +52,28 @@ func main() {
 		web.ServeWebsocket(co, w, r, &upgrader)
 	})
 
-	// Start the stream with the demux
-	go demux.HandleChan(stream.Messages)
+	// Get twitter keys
+	twitterKeys := utils.GetOauthKeys()
+
+	// Create tweet stream
+	tweetStream := twitterstream.NewTweetStream(twitterKeys)
+	stream, err := twitterstream.FilterStream(&tweetStream, filter)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	// Initialize and start the stream switcher
+	ss := twitterstream.Switch{
+		stream.Messages,
+		demux.Handle,
+	}
+
+	go ss.Run()
 
 	// Start the connection orchestrator
 	go co.Run()
+
 
 	// Serve routes with CORs handler
 	http.ListenAndServe(utils.GetPort(), r)
