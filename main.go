@@ -56,20 +56,22 @@ func main() {
 	twitterKeys := utils.GetOauthKeys()
 
 	// Create tweet stream
-	tweetStream := twitterstream.NewTweetStream(twitterKeys)
-	stream, err := twitterstream.FilterStream(&tweetStream, filter)
-
-	if err != nil {
-		log.Print(err)
-	}
+	sh := twitterstream.NewStreamHandler(twitterKeys)
 
 	// Initialize and start the stream switcher
 	ss := twitterstream.Switch{
-		stream.Messages,
+		nil,
 		demux.Handle,
 	}
 
-	go ss.Run()
+	s := twitterstream.Scheduler{
+		Switch: &ss,
+		StreamHandler: sh,
+		Filters: filter,
+		SearchDuration: 30,
+	}
+
+	go s.Run()
 
 	// Start the connection orchestrator
 	go co.Run()

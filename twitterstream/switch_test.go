@@ -4,9 +4,22 @@ import (
 	"testing"
 )
 
+type fakeStreamWrapper struct {
+	Messages chan interface{}
+	StopFunction func()
+}
+
+func (f fakeStreamWrapper) Stop() {
+	f.StopFunction()
+}
+
+func (f fakeStreamWrapper) GetMessages() chan interface{} {
+	return f.Messages
+}
+
 func TestSwitchRun(t *testing.T) {
 	handlerCalls := 0
-	stream := make(chan interface{}, 2)
+	stream := fakeStreamWrapper{make(chan interface{}, 2), func(){}}
 
 	s := Switch{
 		stream,
@@ -15,9 +28,9 @@ func TestSwitchRun(t *testing.T) {
 		},
 	}
 
-	stream <- "foo"
-	stream <- "bar"
-	close(stream)
+	stream.GetMessages() <- "foo"
+	stream.GetMessages() <- "bar"
+	close(stream.GetMessages())
 
 	s.Run()
 
@@ -27,21 +40,29 @@ func TestSwitchRun(t *testing.T) {
 }
 
 func TestSwitchSwitchStream(t *testing.T) {
-	stream := make(chan interface{})
-	newStream := make(chan interface{})
+	stopCalls := 0
 
-	s := Switch{
-		stream,
-		func(interface{}) {},
+	stream1 := fakeStreamWrapper{
+		make(chan interface{}),
+		func() {
+			stopCalls++
+		},
 	}
 
-	s.SwitchStream(newStream)
+	stream2 := fakeStreamWrapper{make(chan interface{}), func(){}}
 
-	if <-stream != nil {
-		t.Error("expected original stream to be closed")
+	s := Switch{stream1, func(interface{}){}}
+	s.SwitchStream(stream2)
+
+	if <-stream1.GetMessages() != nil {
+		t.Error("expected stream1's messages channel to be closed")
 	}
 
-	if s.Stream != newStream {
-		t.Error("expected StreamSwitch Stream to be newStream")
+	if stopCalls != 1 {
+		t.Error("expected stop to be called once")
+	}
+
+	if s.Stream.GetMessages() != stream2.GetMessages() {
+		t.Error("expected StreamSwitch Stream to be stream2")
 	}
 }
