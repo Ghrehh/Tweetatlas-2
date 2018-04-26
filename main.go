@@ -68,7 +68,7 @@ func main() {
 		Switch: &ss,
 		StreamHandler: sh,
 		Filters: filter,
-		SearchDuration: 30,
+		SearchDuration: 5,
 	}
 
 	go s.Run()

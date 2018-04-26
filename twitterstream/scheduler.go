@@ -2,6 +2,8 @@ package twitterstream
 
 import (
 	"log"
+	"time"
+	"fmt"
 )
 
 type Scheduler struct{
@@ -10,12 +12,20 @@ type Scheduler struct{
 	Filters []string
 	FilterIndex int
 	SearchDuration int
-	LastSearchBegan int
 }
 
-func (s *Scheduler) Run() {
+func (s *Scheduler) incrementFilterIndex() {
+	if s.FilterIndex == len(s.Filters) - 1 {
+		s.FilterIndex = 0
+	}
+
+	s.FilterIndex ++
+}
+
+func (s Scheduler) StartStream () {
+	filter := s.Filters[s.FilterIndex]
 	stream, err := s.StreamHandler.CreateFilteredStream(
-		s.Filters,
+		[]string{filter},
 	)
 
 	if err != nil {
@@ -24,4 +34,15 @@ func (s *Scheduler) Run() {
 
 	s.Switch.SwitchStream(stream)
 	s.Switch.Run()
+}
+
+func (s Scheduler) Run() {
+	go s.StartStream()
+
+	for {
+		time.Sleep(time.Duration(s.SearchDuration) * time.Second)
+		fmt.Println(s.Filters[s.FilterIndex])
+		s.incrementFilterIndex()
+		go s.StartStream()
+	}
 }
