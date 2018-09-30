@@ -12,13 +12,14 @@ type LocationAggregater interface {
 	AddParsedLocation(string)
 	ToJSON() []byte
 	AddSampleTweet(*twitter.Tweet, string)
-	Reset([]string)
+	Reset(int)
 }
 
 type LocationAggregate struct {
 	Data map[string]int `json:"location_data"`
 	SampleTweet Tweet `json:"sample_tweet"`
 	SearchPhrases []string `json:"search_phrases"`
+	SearchPhraseIndex int `json:"search_phrase_index"`
 	mutex *sync.Mutex
 }
 
@@ -35,10 +36,10 @@ func NewLocationAggregate(searchPhrases []string) *LocationAggregate {
 	}
 }
 
-func (la *LocationAggregate) Reset(searchPhrases []string) {
+func (la *LocationAggregate) Reset(searchPhraseIndex int) {
 	la.mutex.Lock()
 	la.Data = make(map[string]int)
-	la.SearchPhrases = searchPhrases
+	la.SearchPhraseIndex = searchPhraseIndex
 	la.mutex.Unlock()
 }
 

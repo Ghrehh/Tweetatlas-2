@@ -3,7 +3,6 @@ package twitterstream
 import (
 	"log"
 	"time"
-	"fmt"
 )
 
 type Scheduler struct{
@@ -18,6 +17,7 @@ type Scheduler struct{
 func (s *Scheduler) cycleFilter() {
 	if s.FilterIndex == len(s.Filters) - 1 {
 		s.FilterIndex = 0
+		return
 	}
 
 	s.FilterIndex ++
@@ -34,8 +34,8 @@ func (s Scheduler) StartStream () {
 	}
 
 	s.Switch.SwitchStream(stream)
+	s.LocationAggregate.Reset(s.FilterIndex)
 	s.Switch.Run()
-	s.LocationAggregate.Reset([]string{filter})
 }
 
 func (s Scheduler) Run() {
@@ -43,7 +43,6 @@ func (s Scheduler) Run() {
 
 	for {
 		time.Sleep(time.Duration(s.SearchDuration) * time.Second)
-		fmt.Println(s.Filters[s.FilterIndex])
 		s.cycleFilter()
 		go s.StartStream()
 	}

@@ -21,7 +21,7 @@ func TestLocationAggregate(t *testing.T) {
 	locationAggregateJSON := la.ToJSON()
 	
 	tweetJSON, _ := json.Marshal(tweet)
-	expectedJson := fmt.Sprintf(`{"location_data":{"bar":1,"foo":2,"unknown":1},"sample_tweet":{"parsed_location":"baz","data":%v},"search_phrases":["bar","foo"]}`, string(tweetJSON))
+	expectedJson := fmt.Sprintf(`{"location_data":{"bar":1,"foo":2,"unknown":1},"sample_tweet":{"parsed_location":"baz","data":%v},"search_phrases":["bar","foo"],"search_phrase_index":0}`, string(tweetJSON))
 
 	if string(locationAggregateJSON) != expectedJson {
 		t.Error("expected " + string(locationAggregateJSON) + " to equal " + expectedJson)
@@ -29,24 +29,24 @@ func TestLocationAggregate(t *testing.T) {
 }
 
 func TestReset(t *testing.T) {
-	la := NewLocationAggregate([]string{"bar"})
+	la := NewLocationAggregate([]string{"bar", "foo"})
 	la.AddParsedLocation("foo")
 
 	if la.Data["foo"] != 1 {
 		t.Error("Expected foo to be 1")
 	}
 
-	if la.SearchPhrases[0] != "bar" {
-		t.Error("Expected search phrase to be bar")
+	if la.SearchPhraseIndex != 0 {
+		t.Error("Expected search phrase index to be 0")
 	}
 
-	la.Reset([]string{"foo"})
+	la.Reset(1)
 
 	if la.Data["foo"] != 0 {
 		t.Error("Expected foo to be nil")
 	}
 
-	if la.SearchPhrases[0] != "foo" {
-		t.Error("Expected search phrase to be foo§")
+	if la.SearchPhraseIndex != 1 {
+		t.Error("Expected search phrase index to be 1")
 	}
 }

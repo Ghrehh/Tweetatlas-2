@@ -18,10 +18,10 @@ func main() {
 	log.Print("App Started")
 
 	// Get the search phrase(s)
-	filter := utils.GetStreamFilter()
+	filters := utils.GetStreamFilter()
 
 	// Location aggregate stores our location results
-	locationAggregate := twitterstream.NewLocationAggregate(filter)
+	locationAggregate := twitterstream.NewLocationAggregate(filters)
 
 	// Location finder is a package that attempts to find a Twitter user's location.
 	locationFinder := findlocation.NewLocationFinder()
@@ -67,7 +67,8 @@ func main() {
 	s := twitterstream.Scheduler{
 		Switch: &ss,
 		StreamHandler: sh,
-		Filters: filter,
+		Filters: filters,
+		FilterIndex: 0,
 		SearchDuration: 15,
 		LocationAggregate: locationAggregate,
 	}
