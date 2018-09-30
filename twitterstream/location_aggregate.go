@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 	"log"
+	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 )
@@ -12,7 +13,7 @@ type LocationAggregater interface {
 	AddParsedLocation(string)
 	ToJSON() []byte
 	AddSampleTweet(*twitter.Tweet, string)
-	Reset(int)
+	Reset(int, time.Time)
 }
 
 type LocationAggregate struct {
@@ -20,6 +21,7 @@ type LocationAggregate struct {
 	SampleTweet Tweet `json:"sample_tweet"`
 	SearchPhrases []string `json:"search_phrases"`
 	SearchPhraseIndex int `json:"search_phrase_index"`
+	NextSearch time.Time `json:"next_search"`
 	mutex *sync.Mutex
 }
 
@@ -36,10 +38,11 @@ func NewLocationAggregate(searchPhrases []string) *LocationAggregate {
 	}
 }
 
-func (la *LocationAggregate) Reset(searchPhraseIndex int) {
+func (la *LocationAggregate) Reset(searchPhraseIndex int, nextSearch time.Time) {
 	la.mutex.Lock()
 	la.Data = make(map[string]int)
 	la.SearchPhraseIndex = searchPhraseIndex
+	la.NextSearch = nextSearch
 	la.mutex.Unlock()
 }
 

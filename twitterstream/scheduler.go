@@ -33,8 +33,10 @@ func (s Scheduler) StartStream () {
 		log.Print(err)
 	}
 
+	nextSearch := time.Now().Add(time.Duration(s.SearchDuration) * time.Second)
+
 	s.Switch.SwitchStream(stream)
-	s.LocationAggregate.Reset(s.FilterIndex)
+	s.LocationAggregate.Reset(s.FilterIndex, nextSearch)
 	s.Switch.Run()
 }
 

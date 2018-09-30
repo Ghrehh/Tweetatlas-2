@@ -31,7 +31,7 @@ func (f fakeLocationAggregate) ToJSON() []byte {
 	return []byte("foo")
 }
 
-func (f fakeLocationAggregate) Reset(int) {
+func (f fakeLocationAggregate) Reset(int, time.Time) {
 }
 
 func TestConnectionOrchestratorRun(t *testing.T) {

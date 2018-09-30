@@ -4,6 +4,7 @@ import (
 	"testing"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 )
@@ -21,7 +22,7 @@ func TestLocationAggregate(t *testing.T) {
 	locationAggregateJSON := la.ToJSON()
 	
 	tweetJSON, _ := json.Marshal(tweet)
-	expectedJson := fmt.Sprintf(`{"location_data":{"bar":1,"foo":2,"unknown":1},"sample_tweet":{"parsed_location":"baz","data":%v},"search_phrases":["bar","foo"],"search_phrase_index":0}`, string(tweetJSON))
+	expectedJson := fmt.Sprintf(`{"location_data":{"bar":1,"foo":2,"unknown":1},"sample_tweet":{"parsed_location":"baz","data":%v},"search_phrases":["bar","foo"],"search_phrase_index":0,"next_search":"0001-01-01T00:00:00Z"}`, string(tweetJSON))
 
 	if string(locationAggregateJSON) != expectedJson {
 		t.Error("expected " + string(locationAggregateJSON) + " to equal " + expectedJson)
@@ -40,7 +41,9 @@ func TestReset(t *testing.T) {
 		t.Error("Expected search phrase index to be 0")
 	}
 
-	la.Reset(1)
+	nextSearch := time.Now()
+
+	la.Reset(1, nextSearch)
 
 	if la.Data["foo"] != 0 {
 		t.Error("Expected foo to be nil")
@@ -48,5 +51,9 @@ func TestReset(t *testing.T) {
 
 	if la.SearchPhraseIndex != 1 {
 		t.Error("Expected search phrase index to be 1")
+	}
+
+	if la.NextSearch != nextSearch {
+		t.Error("Expected nextSearch to be set")
 	}
 }
