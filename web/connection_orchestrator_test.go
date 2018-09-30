@@ -24,7 +24,7 @@ type fakeLocationAggregate struct{
 func (f fakeLocationAggregate) AddParsedLocation(string) {
 }
 
-func (f fakeLocationAggregate) AddSampleTweet(*twitter.Tweet) {
+func (f fakeLocationAggregate) AddSampleTweet(*twitter.Tweet, string) {
 }
 
 func (f fakeLocationAggregate) ToJSON() []byte {

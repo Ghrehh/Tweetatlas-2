@@ -16,12 +16,12 @@ func TestLocationAggregate(t *testing.T) {
 	la.AddParsedLocation("foo")
 	la.AddParsedLocation("bar")
 	la.AddParsedLocation("")
-	la.AddSampleTweet(tweet)
+	la.AddSampleTweet(tweet, "baz")
 
 	locationAggregateJSON := la.ToJSON()
 	
 	tweetJSON, _ := json.Marshal(tweet)
-	expectedJson := fmt.Sprintf(`{"location_data":{"bar":1,"foo":2,"unknown":1},"sample_tweet":%v,"search_phrases":["bar","foo"]}`, string(tweetJSON))
+	expectedJson := fmt.Sprintf(`{"location_data":{"bar":1,"foo":2,"unknown":1},"sample_tweet":{"parsed_location":"baz","data":%v},"search_phrases":["bar","foo"]}`, string(tweetJSON))
 
 	if string(locationAggregateJSON) != expectedJson {
 		t.Error("expected " + string(locationAggregateJSON) + " to equal " + expectedJson)
