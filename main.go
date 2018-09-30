@@ -60,15 +60,16 @@ func main() {
 
 	// Initialize and start the stream switcher
 	ss := twitterstream.Switch{
-		nil,
-		demux.Handle,
+		Stream: nil,
+		Handler: demux.Handle,
 	}
 
 	s := twitterstream.Scheduler{
 		Switch: &ss,
 		StreamHandler: sh,
 		Filters: filter,
-		SearchDuration: 30,
+		SearchDuration: 15,
+		LocationAggregate: locationAggregate,
 	}
 
 	go s.Run()

@@ -54,10 +54,6 @@ func TestSwitchSwitchStream(t *testing.T) {
 	s := Switch{stream1, func(interface{}){}}
 	s.SwitchStream(stream2)
 
-	if <-stream1.GetMessages() != nil {
-		t.Error("expected stream1's messages channel to be closed")
-	}
-
 	if stopCalls != 1 {
 		t.Error("expected stop to be called once")
 	}

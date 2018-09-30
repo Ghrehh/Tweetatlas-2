@@ -23,7 +23,6 @@ func (s Switch) Run() {
 func (s *Switch) SwitchStream(stream StopperGetMessages) {
 	if s.Stream != nil {
 		s.Stream.Stop()
-		close(s.Stream.GetMessages())
 	}
 
 	s.Stream = stream
