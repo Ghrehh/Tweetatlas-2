@@ -5,13 +5,19 @@ language: ruby
 services:
   - docker
 
+before_install:
+  - echo -e "machine api.heroku.com\n  login $HEROKU_USERNAME\n  password $HEROKU_PASSWORD\nmachine git.heroku.com\n  login $HEROKU_USERNAME\n  password $HEROKU_PASSWORD" >> ~/.netrc
+
+
 script:
 - make test
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    curl https://cli-assets.heroku.com/install-ubuntu.sh | sh;
     docker build -t tweetatlas .;
     docker login -u "$HEROKU_USERNAME" -p "$HEROKU_PASSWORD" registry.heroku.com;
     docker tag tweetatlas registry.heroku.com/tweetatlas/web;
     docker push registry.heroku.com/tweetatlas/web;
+    heroku container:release web -a tweetatlas;
     fi
